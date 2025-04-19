@@ -1,0 +1,25 @@
+{
+  "movies": [
+    {
+      "id": "1afe",
+      "image": "https://upload.wikimedia.org/wikipedia/en/3/34/Cars_2006.jpg",
+      "title": "Cars",
+      "description": "An animated movie about talking cars",
+      "origin": "USA",
+      "reviews": [],
+      "likes": 0,
+      "dislikes": 0
+    },
+    {
+      "id": "2bge",
+      "image": "https://upload.wikimedia.org/wikipedia/en/1/13/Toy_Story.jpg",
+      "title": "Toy Story",
+      "description": "Toys come to life when humans aren't looking",
+      "origin": "USA",
+      "reviews": [],
+      "likes": 0,
+      "dislikes": 0
+    }
+  ],
+  "favorites": []
+}
