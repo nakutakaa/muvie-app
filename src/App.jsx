@@ -12,50 +12,137 @@ function App() {
   const [showFavorites, setShowFavorites] = useState(false);
   const [favorites, setFavorites] = useState([]);
 
-  useEffect(() => {
-    fetch("/db.json")
-      .then((response) => response.json())
-      .then((data) => {
-        setMovies(data.movies);
-        setFavorites(data.favorites);
-      });
-  }, []);
+   useEffect(() => {
+     // Fetch movies
+     fetch("http://localhost:3001/movies")
+       .then((response) => response.json())
+       .then((data) => setMovies(data));
 
-  const filteredMovies = movies.filter((movie) =>
-    movie.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+     // Fetch favorites
+     fetch("http://localhost:3001/favorites")
+       .then((response) => response.json())
+       .then((data) => setFavorites(data));
+   }, []);
 
-  const addMovie = (newMovie) => {
-    setMovies([...movies, newMovie]);
-    // In a real app, you would update db.json here
-  };
+   const filteredMovies = movies.filter((movie) =>
+     movie.title.toLowerCase().includes(searchTerm.toLowerCase())
+   );
 
-  const addReview = (movieId, review) => {
-    setMovies(
-      movies.map((movie) =>
-        movie.id === movieId
-          ? { ...movie, reviews: [...movie.reviews, review] }
-          : movie
-      )
-    );
-  };
+   const addMovie = (newMovie) => {
+     fetch("http://localhost:3001/movies", {
+       method: "POST",
+       headers: {
+         "Content-Type": "application/json",
+       },
+       body: JSON.stringify(newMovie),
+     })
+       .then((response) => response.json())
+       .then((data) => setMovies([...movies, data]));
+   };
 
-  const updateLikes = (movieId, type) => {
-    setMovies(
-      movies.map((movie) =>
-        movie.id === movieId ? { ...movie, [type]: movie[type] + 1 } : movie
-      )
-    );
-  };
+   const addReview = (movieId, review) => {
+     const movieToUpdate = movies.find((movie) => movie.id === movieId);
+     const updatedMovie = {
+       ...movieToUpdate,
+       reviews: [...movieToUpdate.reviews, review],
+     };
 
-  const toggleFavorite = (movieId) => {
-    if (favorites.includes(movieId)) {
-      setFavorites(favorites.filter((id) => id !== movieId));
-    } else {
-      setFavorites([...favorites, movieId]);
-    }
-    // In a real app, you would update db.json here
-  };
+     fetch(`http://localhost:3001/movies/${movieId}`, {
+       method: "PUT",
+       headers: {
+         "Content-Type": "application/json",
+       },
+       body: JSON.stringify(updatedMovie),
+     }).then(() => {
+       setMovies(
+         movies.map((movie) => (movie.id === movieId ? updatedMovie : movie))
+       );
+     });
+   };
+
+   const updateLikes = (movieId, type) => {
+     const movieToUpdate = movies.find((movie) => movie.id === movieId);
+     const updatedMovie = {
+       ...movieToUpdate,
+       [type]: movieToUpdate[type] + 1,
+     };
+
+     fetch(`http://localhost:3001/movies/${movieId}`, {
+       method: "PUT",
+       headers: {
+         "Content-Type": "application/json",
+       },
+       body: JSON.stringify(updatedMovie),
+     }).then(() => {
+       setMovies(
+         movies.map((movie) => (movie.id === movieId ? updatedMovie : movie))
+       );
+     });
+   };
+
+   const toggleFavorite = (movieId) => {
+     let updatedFavorites;
+     if (favorites.includes(movieId)) {
+       updatedFavorites = favorites.filter((id) => id !== movieId);
+     } else {
+       updatedFavorites = [...favorites, movieId];
+     }
+
+     // Update favorites in db.json
+     fetch("http://localhost:3001/favorites", {
+       method: "PUT",
+       headers: {
+         "Content-Type": "application/json",
+       },
+       body: JSON.stringify(updatedFavorites),
+     }).then(() => setFavorites(updatedFavorites));
+   };
+
+
+  // useEffect(() => {
+  //   fetch("/db.json")
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       setMovies(data.movies);
+  //       setFavorites(data.favorites);
+  //     });
+  // }, []);
+
+  // const filteredMovies = movies.filter((movie) =>
+  //   movie.title.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
+
+  // const addMovie = (newMovie) => {
+  //   setMovies([...movies, newMovie]);
+  //   // In a real app, you would update db.json here
+  // };
+
+  // const addReview = (movieId, review) => {
+  //   setMovies(
+  //     movies.map((movie) =>
+  //       movie.id === movieId
+  //         ? { ...movie, reviews: [...movie.reviews, review] }
+  //         : movie
+  //     )
+  //   );
+  // };
+
+  // const updateLikes = (movieId, type) => {
+  //   setMovies(
+  //     movies.map((movie) =>
+  //       movie.id === movieId ? { ...movie, [type]: movie[type] + 1 } : movie
+  //     )
+  //   );
+  // };
+
+  // const toggleFavorite = (movieId) => {
+  //   if (favorites.includes(movieId)) {
+  //     setFavorites(favorites.filter((id) => id !== movieId));
+  //   } else {
+  //     setFavorites([...favorites, movieId]);
+  //   }
+  //   // In a real app, you would update db.json here
+  // };
 
   return (
     <div className="app">
